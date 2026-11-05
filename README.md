@@ -70,6 +70,6 @@ docs/contrat.md         formats et signatures communs
 
 | Membre | Partie |
 |---|---|
-| Prénom NOM | Ingestion et transformation (modules 1 et 2) |
-| Prénom NOM | Analyse et détection (module 3) |
+| Yann DIARRASSOUBA | Ingestion et transformation (modules 1 et 2) |
+| Dhanoush KESSAVANE | Analyse et détection (module 3) |
 | Saber BOUCIOUF | Règles, audit, ligne de commande (module 4, `main.py`) |
