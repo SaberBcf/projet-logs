@@ -1,0 +1,10 @@
+2026-11-05T14:30:01Z | ERROR | 192.0.2.10 | alice | login failure
+2026-11-05T14:30:02Z | ERROR | 192.0.2.20 | bob | login failure
+2026-11-05T14:30:03Z | ERROR | 192.0.2.10 | alice | login failure
+2026-11-05T14:30:04Z | INFO | 192.0.2.10 | alice | page_view
+2026-11-05T14:30:05Z | ERROR | 192.0.2.10 | alice | login failure
+2026-11-05T14:30:06Z | ERROR | 192.0.2.10 | alice | login failure
+2026-11-05T14:30:07Z | INFO | 192.0.2.10 | alice | login success
+
+2026-11-05T14:30:08Z | ERROR | 192.0.2.10 | alice | login failure
+ligne sans aucun séparateur

@@ -1,0 +1,10 @@
+[tool.ruff]
+line-length = 79
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "W", "F", "I", "N"]
+
+[tool.pyright]
+pythonVersion = "3.10"
+typeCheckingMode = "basic"

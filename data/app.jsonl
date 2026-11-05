@@ -1,0 +1,5 @@
+{"timestamp": "2026-11-05T14:35:01Z", "level": "info", "ip": "203.0.113.5", "user": "carol", "payload": {"event": "login", "status": "success"}, "port": 443, "protocol": "tcp"}
+{"timestamp": "2026-11-05T14:35:02Z", "level": "warning", "ip": "203.0.113.5", "user": "carol", "payload": "disk usage 91%"}
+{"timestamp": "2026-11-05T14:35:03Z", "level": "CRITICAL", "ip": "198.51.100.7", "user": null, "payload": {"event": "service", "status": "crash"}, "port": 8080, "protocol": "TCP"}
+{"timestamp": "2026-11-05T14:35:04Z", "level": "ERROR", "ip": "203.0.113.9", "user": "dave", "payload": {"event": "login", "status": "failure"}}
+{"timestamp": "2026-11-05T14:35:05Z", "level": "ERROR", "ip": "203.0.113.9"
