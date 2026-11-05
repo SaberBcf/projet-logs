@@ -1,23 +1,13 @@
-"""Module 1 : lecture progressive des sources de journaux."""
+"""Module 1 : lecture progressive des fichiers de logs."""
 
 from collections.abc import Iterable, Iterator
 
-from logengine.models import RawRecord
-
 
 def read_lines(path: str) -> Iterator[str]:
-    """Renvoie les lignes d'un fichier une par une (yield)."""
+    """Renvoie les lignes d'un fichier une par une, sans le saut de ligne."""
     raise NotImplementedError
 
 
-def read_records(path: str) -> Iterator[RawRecord]:
-    """Renvoie les enregistrements bruts d'un fichier selon son extension.
-
-    .log -> str, .jsonl -> dict, .csv -> tuple.
-    """
-    raise NotImplementedError
-
-
-def read_sources(paths: Iterable[str]) -> Iterator[RawRecord]:
-    """Enchaîne plusieurs fichiers dans l'ordre fourni (yield from)."""
+def read_sources(paths: Iterable[str]) -> Iterator[str]:
+    """Enchaîne les lignes de plusieurs fichiers, dans l'ordre (yield from)."""
     raise NotImplementedError
