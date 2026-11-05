@@ -1,10 +1,13 @@
 """Point d'entrée : lance le pipeline complet."""
 
+from collections import defaultdict
+
 from logengine.analytics import init_state, summarize, update_stats
 from logengine.audit import export_audit
 from logengine.cli import parse_args
 from logengine.detection import detect_bruteforce
 from logengine.ingestion import read_sources
+from logengine.models import Rejected
 from logengine.rules import (
     apply_security_rules,
     check_blacklist,
@@ -17,8 +20,9 @@ def main(argv: list[str] | None = None) -> int:
     args = parse_args(argv)
     blacklist = load_blacklist(args.blacklist)
     state = init_state()
+    rejected: Rejected = defaultdict(int)
 
-    logs = prepare_logs(read_sources(args.files))
+    logs = prepare_logs(read_sources(args.files), rejected)
     for log in logs:
         update_stats(log, state)
         alerts = apply_security_rules(
@@ -34,6 +38,9 @@ def main(argv: list[str] | None = None) -> int:
 
     for key, value in summarize(state, blacklist).items():
         print(f"{key} : {value}")
+    print(f"Lignes rejetées : {sum(rejected.values())}")
+    for reason, count in sorted(rejected.items()):
+        print(f"  {reason} : {count}")
 
     if args.audit:
         export_audit(globals(), locals(), args.audit)

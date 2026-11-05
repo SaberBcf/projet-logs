@@ -1,0 +1,20 @@
+2026-11-05T14:30:01Z | ERROR | sshd | 192.0.2.10 | alice | login failure
+2026-11-05T14:30:02Z | ERROR | sshd | 192.0.2.20 | bob | login failure
+2026-11-05T14:30:03Z | ERROR | sshd | 192.0.2.10 | alice | login failure
+2026-11-05T14:30:04Z | INFO | api | 192.0.2.10 | alice | {"event": "page_view", "status": "ok", "code": 200}
+2026-11-05T14:30:05Z | ERROR | sshd | 192.0.2.10 | alice | login failure
+2026-11-05T14:30:06Z | ERROR | sshd | 192.0.2.10 | alice | login failure
+2026-11-05T14:30:07Z | INFO | sshd | 192.0.2.10 | alice | login success
+2026-11-05T14:30:08Z | ERROR | sshd | 192.0.2.10 | alice | login failure
+2026-11-05T14:30:09Z | WARNING | firewall | 198.51.100.7 | - | 198.51.100.7:22/TCP
+2026-11-05T14:30:10Z | INFO | api | 203.0.113.5 | carol | {"event": "login", "status": "success", "code": 200}
+2026-11-05T14:30:11Z | CRITICAL | db | 203.0.113.9 | - | connection pool exhausted
+2026-11-05T14:30:12Z |  warn  | NGINX | 203.0.113.5 | Carol |   slow response   
+
+2026-11-05T14:30:13Z | ERROR | api | 203.0.113.5 | carol | {"event": "login", "st
+2026-13-45T99:00:00Z | ERROR | sshd | 192.0.2.10 | bob | login failure
+2026-11-05T14:30:14Z | ERROR | sshd | 300.1.2.3 | bob | login failure
+2026-11-05T14:30:15Z | DEBUGX | sshd | 192.0.2.10 | alice | login failure
+2026-11-05T14:30:16Z | INFO | firewall | 203.0.113.5 | - | 203.0.113.5:http/TCP
+ligne illisible sans separateur
+2026-11-05T14:30:17Z | ERROR | sshd | 192.0.2.10
