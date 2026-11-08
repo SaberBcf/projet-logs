@@ -4,10 +4,13 @@ from collections.abc import Iterable, Iterator
 
 
 def read_lines(path: str) -> Iterator[str]:
-    """Renvoie les lignes d'un fichier une par une, sans le saut de ligne."""
-    raise NotImplementedError
+    """Fournit les lignes du fichier sans le /n a la fin"""
+    with open(path, "r", encoding="utf-8") as fichier:
+        for ligne in fichier:
+            yield ligne.rstrip("\n")
 
 
 def read_sources(paths: Iterable[str]) -> Iterator[str]:
-    """Enchaîne les lignes de plusieurs fichiers, dans l'ordre (yield from)."""
-    raise NotImplementedError
+    """Fournit les lignes de plusieurs fichiers a la suite"""
+    for path in paths:
+        yield from read_lines(path)
