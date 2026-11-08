@@ -16,7 +16,7 @@ class TestAnalytics(unittest.TestCase):
         self.summary = summarize(self.state, BLACKLIST)
 
     def test_counters(self) -> None:
-        for key in ("total", "levels", "users"):
+        for key in ("total", "levels", "sources", "users"):
             with self.subTest(key=key):
                 self.assertEqual(self.summary[key], EXPECTED[key])
 
