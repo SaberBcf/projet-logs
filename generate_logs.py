@@ -16,9 +16,9 @@ START = 1793491200  # 2026-11-01T00:00:00Z en secondes depuis 1970
 LINES_PER_SECOND = 20
 
 P_ATTACK = 1 / 4000  # une vague de force brute toutes les 4000 lignes
-P_EMPTY = 0.002
-P_BROKEN = 0.01
-P_DIRTY = 0.03
+P_EMPTY = 1 / 500
+P_BROKEN = 1 / 100
+P_DIRTY = 1 / 100
 
 CLIENTS = [f"10.0.{a}.{b}" for a in range(80) for b in range(1, 251)]
 USERS = [f"user{n}" for n in range(5000)]
