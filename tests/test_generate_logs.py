@@ -2,6 +2,7 @@ import unittest
 
 from generate_logs import (
     ATTACKERS,
+    HOME_IPS,
     ONE_GB,
     UNSTABLE_CLIENTS,
     generate_lines,
@@ -38,14 +39,25 @@ class TestGenerateLines(unittest.TestCase):
         for line in first_lines(7, 1000):
             self.assertTrue(line.endswith("\n"))
 
-    def test_errors_come_from_unstable_clients_or_attackers(self) -> None:
+    def test_errors_come_from_known_clients(self) -> None:
         allowed = set(UNSTABLE_CLIENTS) | set(ATTACKERS)
+        allowed = allowed | set(HOME_IPS.values())
         for line in first_lines(7, 20000):
             fields = line.split(" | ")
             if len(fields) == 6 and fields[1] == "ERROR":
                 ip = fields[3].strip()
                 if not ip.startswith("300"):
                     self.assertIn(ip, allowed)
+
+    def test_ssh_users_connect_from_their_own_ip(self) -> None:
+        for line in first_lines(7, 20000):
+            fields = line.split(" | ")
+            if len(fields) == 6 and fields[2] == "sshd":
+                ip, user = fields[3], fields[4]
+                if ip in ATTACKERS or ip.startswith(("300", " ")):
+                    continue
+                if user in HOME_IPS:
+                    self.assertEqual(ip, HOME_IPS[user])
 
 
 if __name__ == "__main__":
