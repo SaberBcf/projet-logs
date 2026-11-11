@@ -23,6 +23,8 @@ P_DIRTY = 0.03
 CLIENTS = [f"10.0.{a}.{b}" for a in range(80) for b in range(1, 251)]
 UNSTABLE_CLIENTS = CLIENTS[:2000]  # les 10 % de clients qui ont des erreurs
 USERS = [f"user{n}" for n in range(5000)]
+# chaque utilisateur se connecte en SSH depuis son propre poste
+HOME_IPS = {user: CLIENTS[n] for n, user in enumerate(USERS)}
 ATTACKERS = [f"198.51.100.{n}" for n in range(10, 50)]
 SOURCES = ["api"] * 35 + ["nginx"] * 20 + ["sshd"] * 20
 SOURCES = SOURCES + ["firewall"] * 20 + ["db"] * 5
@@ -71,7 +73,7 @@ def make_event(ip: str) -> tuple[str, str, str, str]:
         code = random.choice([200, 200, 200, 304, 404, 500])
         return level_for_code(code), source, "-", f"GET /index.html {code}"
     if source == "sshd":
-        if random.random() < 0.1:
+        if random.random() < 0.02:
             return "ERROR", source, user, "login failure"
         return "INFO", source, user, "login success"
     if source == "db":
@@ -135,7 +137,9 @@ def generate_lines(seed: int) -> Iterator[str]:
             continue
         ip = random.choice(CLIENTS)
         level, source, user, message = make_event(ip)
-        if level in ("ERROR", "CRITICAL"):
+        if source == "sshd":
+            ip = HOME_IPS[user]
+        elif level in ("ERROR", "CRITICAL"):
             ip = random.choice(UNSTABLE_CLIENTS)
         fields = [timestamp(line_number), level, source, ip, user, message]
         roll = random.random()
