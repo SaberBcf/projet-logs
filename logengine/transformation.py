@@ -9,6 +9,7 @@ from typing import Any
 
 from logengine.models import Log, Rejected
 
+
 NIVEAUX_ACCEPTES = {
     "INFO",
     "WARNING",
@@ -19,13 +20,22 @@ NIVEAUX_ACCEPTES = {
     "CRIT",
 }
 
-# Un message de connexion a la forme adresse:port/protocole.
-# On garde la partie port en texte pour pouvoir détecter les ports invalides.
+
+# Reconnaissance des messages de connexion : adresse:port/protocole.
 CONNEXION_RE = re.compile(r"([0-9.]+):([^/\s]+)/([A-Za-z]+)")
+
+
+# Correspondances entre les niveaux abrégés et les niveaux complets.
+ALIASES_NIVEAUX = {
+    "WARN": "WARNING",
+    "ERR": "ERROR",
+    "CRIT": "CRITICAL",
+}
 
 
 def to_log(line: str, rejected: Rejected) -> Log | None:
     """Valide les champs et route le message texte, JSON ou connexion."""
+
     champs = line.split(" | ", 5)
 
     if len(champs) != 6:
@@ -58,8 +68,7 @@ def to_log(line: str, rejected: Rejected) -> Log | None:
 
     message = message.strip()
 
-    # Avant le match, on interprète la forme du message. Le type de
-    # candidat est ensuite str, dict ou tuple, selon son contenu.
+    # Le message peut devenir une chaîne, un dictionnaire ou un tuple.
     candidat: str | dict[str, Any] | tuple[str, int, str] = message
 
     if message.startswith("{"):
@@ -68,10 +77,13 @@ def to_log(line: str, rejected: Rejected) -> Log | None:
         except json.JSONDecodeError:
             rejected["json_invalide"] += 1
             return None
+
     else:
         connexion_trouvee = CONNEXION_RE.fullmatch(message)
+
         if connexion_trouvee is not None:
             adresse, port_texte, protocole = connexion_trouvee.groups()
+
             try:
                 port = int(port_texte)
             except ValueError:
@@ -93,6 +105,7 @@ def to_log(line: str, rejected: Rejected) -> Log | None:
     connection = (ip, None, None)
 
     match candidat:
+
         case "login failure":
             payload = {
                 "event": "login",
@@ -127,14 +140,60 @@ def to_log(line: str, rejected: Rejected) -> Log | None:
 
 
 def normalize(log: Log) -> Log:
-    """Nettoie un Log : majuscules, minuscules, espaces, alias de niveau."""
-    raise NotImplementedError
+    """Renvoie un log nettoyé sans modifier le dictionnaire reçu."""
+
+    # 1. Normalisation du niveau de gravité
+    niveau = log["level"].strip().upper()
+    niveau = ALIASES_NIVEAUX.get(niveau, niveau)
+
+    # 2. Normalisation de l'utilisateur
+    utilisateur = log["user"]
+
+    if utilisateur is not None:
+        utilisateur = utilisateur.strip().lower()
+
+        if utilisateur == "-":
+            utilisateur = None
+
+    # 3. Normalisation du tuple de connexion
+    adresse_connexion, port, protocole = log["connection"]
+
+    adresse_connexion = adresse_connexion.strip()
+
+    if protocole is not None:
+        protocole = protocole.strip().upper()
+
+    # 4. Normalisation du payload
+    donnees = log["payload"]
+
+    if isinstance(donnees, dict):
+
+        # On copie le dictionnaire sans modifier l'original.
+        payload = {
+            cle: valeur.strip() if isinstance(valeur, str) else valeur
+            for cle, valeur in donnees.items()
+        }
+
+    else:
+        payload = donnees.strip()
+
+        # On harmonise la représentation des connexions réseau.
+        if port is not None and protocole is not None:
+            payload = f"{adresse_connexion}:{port}/{protocole}"
+
+    # 5. Construction du nouveau log normalisé.
+    return {
+        "timestamp": log["timestamp"].strip(),
+        "level": niveau,
+        "source": log["source"].strip().lower(),
+        "ip": log["ip"].strip(),
+        "user": utilisateur,
+        "payload": payload,
+        "connection": (adresse_connexion, port, protocole),
+    }
 
 
 def prepare_logs(lines: Iterable[str], rejected: Rejected) -> Iterator[Log]:
-    """Enchaîne les étapes sans jamais transformer le flux en liste.
+    """Assemble les étapes du pipeline de traitement des logs."""
 
-    filter avec lambda (lignes vides), map avec lambda (to_log),
-    filter(None, ...) (lignes rejetées), map(normalize).
-    """
     raise NotImplementedError
