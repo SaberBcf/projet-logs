@@ -84,4 +84,4 @@ docs/contrat.md         format des lignes, anomalies, signatures
 |---|---|
 | Yann DIARRASSOUBA | Ingestion et transformation (modules 1 et 2) |
 | Dhanoush KESSAVANE | Analyse et détection (module 3) |
-| Saber BOUCIOUF | Règles, audit, ligne de commande (module 4, `main.py`) |
+| Saber BOUCIOUF | Règles, audit, ligne de commande, script de génération (module 4, `main.py`, `generate_logs.py`) |
