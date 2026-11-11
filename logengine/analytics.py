@@ -16,6 +16,7 @@ def init_state() -> State:
         "total": 0,
         # Compteurs : une clé absente démarre automatiquement à 0.
         "levels": defaultdict(int),
+        "sources": defaultdict(int),
         "users": defaultdict(int),
         # Ensembles : une même IP n'est stockée qu'une seule fois.
         "active_ips": set(),
@@ -32,6 +33,7 @@ def update_stats(log: Log, state: State) -> None:
     """Met à jour les compteurs (defaultdict) et les ensembles d'IP (set)."""
     state["total"] += 1
     state["levels"][log["level"]] += 1
+    state["sources"][log["source"]] += 1
 
     if log["user"] is not None:
         state["users"][log["user"]] += 1
@@ -49,6 +51,7 @@ def summarize(state: State, blacklist: frozenset[str]) -> dict[str, Any]:
     return {
         "total": state["total"],
         "levels": dict(state["levels"]),
+        "sources": dict(state["sources"]),
         "users": dict(state["users"]),
         "active_ips": set(active),
         "error_ips": set(state["error_ips"]),
