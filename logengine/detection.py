@@ -11,7 +11,9 @@ AUTH_STATUSES: frozenset[str] = frozenset({"failure", "success"})
 def _auth_status(log: Log) -> str | None:
     """Renvoie "failure" ou "success" si le log est une connexion, sinon None."""
     match log["payload"]:
-        case {"event": "login", "status": str(status)} if status in AUTH_STATUSES:
+        case {"event": "login", "status": str(status)} if (
+            status in AUTH_STATUSES
+        ):
             return status
         case _:
             return None

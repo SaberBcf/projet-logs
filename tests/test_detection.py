@@ -6,7 +6,14 @@ from copy import deepcopy
 from logengine.analytics import init_state
 from logengine.detection import detect_bruteforce
 from logengine.models import Log
-from tests.fixtures import EXPECTED, IP_A, IP_B, TEST_LOGS, THRESHOLD, fake_logs
+from tests.fixtures import (
+    EXPECTED,
+    IP_A,
+    IP_B,
+    TEST_LOGS,
+    THRESHOLD,
+    fake_logs,
+)
 
 
 def login(ip: str, user: str | None, status: str, n: int = 0) -> Log:
@@ -31,7 +38,9 @@ def run(logs: list[Log], threshold: int = THRESHOLD) -> list[int]:
 
 class TestDetectBruteforce(unittest.TestCase):
     def test_reference_scenario(self) -> None:
-        self.assertEqual(run(list(fake_logs())), EXPECTED["bruteforce_alerts_at"])
+        self.assertEqual(
+            run(list(fake_logs())), EXPECTED["bruteforce_alerts_at"]
+        )
 
     def test_alert_content(self) -> None:
         state = init_state()
@@ -106,7 +115,9 @@ class TestDetectBruteforce(unittest.TestCase):
         for _ in range(100):
             log = login(IP_A, "alice", "failure")
             detect_bruteforce(log, state=state, threshold=THRESHOLD)
-        self.assertEqual(len(state["auth_history"][(IP_A, "alice")]), THRESHOLD)
+        self.assertEqual(
+            len(state["auth_history"][(IP_A, "alice")]), THRESHOLD
+        )
 
     def test_extra_options_accepted(self) -> None:
         state = init_state()
@@ -119,7 +130,9 @@ class TestDetectBruteforce(unittest.TestCase):
     def test_invalid_threshold(self) -> None:
         with self.assertRaises(ValueError):
             detect_bruteforce(
-                login(IP_A, "alice", "failure"), state=init_state(), threshold=0
+                login(IP_A, "alice", "failure"),
+                state=init_state(),
+                threshold=0,
             )
 
 

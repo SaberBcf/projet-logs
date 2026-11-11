@@ -18,7 +18,6 @@ def ligne(message: str, *, level: str = "INFO", user: str = "alice") -> str:
 
 
 class TestPoint3Interpretation(unittest.TestCase):
-
     def test_login_et_texte_libre(self) -> None:
         rejected = defaultdict(int)
 
@@ -31,13 +30,11 @@ class TestPoint3Interpretation(unittest.TestCase):
         assert autre is not None
 
         self.assertEqual(
-            echec["payload"],
-            {"event": "login", "status": "failure"}
+            echec["payload"], {"event": "login", "status": "failure"}
         )
 
         self.assertEqual(
-            succes["payload"],
-            {"event": "login", "status": "success"}
+            succes["payload"], {"event": "login", "status": "success"}
         )
 
         self.assertEqual(autre["payload"], "service started")
@@ -46,10 +43,7 @@ class TestPoint3Interpretation(unittest.TestCase):
     def test_objet_json_devenu_dictionnaire(self) -> None:
         rejected = defaultdict(int)
 
-        log = to_log(
-            ligne('{"event": "page_view", "code": 200}'),
-            rejected
-        )
+        log = to_log(ligne('{"event": "page_view", "code": 200}'), rejected)
 
         assert log is not None
 
@@ -63,31 +57,19 @@ class TestPoint3Interpretation(unittest.TestCase):
         rejected = defaultdict(int)
 
         self.assertIsNone(
-            to_log(
-                ligne('{"event": "login", "status":'),
-                rejected
-            )
+            to_log(ligne('{"event": "login", "status":'), rejected)
         )
 
-        self.assertEqual(
-            dict(rejected),
-            {"json_invalide": 1}
-        )
+        self.assertEqual(dict(rejected), {"json_invalide": 1})
 
     def test_connexion_routee_en_tuple(self) -> None:
         rejected = defaultdict(int)
 
-        log = to_log(
-            ligne("198.51.100.7:22/TCP", user="-"),
-            rejected
-        )
+        log = to_log(ligne("198.51.100.7:22/TCP", user="-"), rejected)
 
         assert log is not None
 
-        self.assertEqual(
-            log["connection"],
-            ("198.51.100.7", 22, "TCP")
-        )
+        self.assertEqual(log["connection"], ("198.51.100.7", 22, "TCP"))
 
         self.assertEqual(log["ip"], "192.0.2.10")
         self.assertEqual(log["payload"], "198.51.100.7:22/TCP")
@@ -96,22 +78,14 @@ class TestPoint3Interpretation(unittest.TestCase):
     def test_ports_invalides_rejetes(self) -> None:
         rejected = defaultdict(int)
 
-        self.assertIsNone(
-            to_log(ligne("203.0.113.5:http/TCP"), rejected)
-        )
+        self.assertIsNone(to_log(ligne("203.0.113.5:http/TCP"), rejected))
 
-        self.assertIsNone(
-            to_log(ligne("203.0.113.5:65536/TCP"), rejected)
-        )
+        self.assertIsNone(to_log(ligne("203.0.113.5:65536/TCP"), rejected))
 
-        self.assertEqual(
-            dict(rejected),
-            {"port_invalide": 2}
-        )
+        self.assertEqual(dict(rejected), {"port_invalide": 2})
 
 
 class TestPoint4Normalisation(unittest.TestCase):
-
     def test_niveaux_et_alias(self) -> None:
 
         for initial, attendu in (
@@ -120,18 +94,13 @@ class TestPoint4Normalisation(unittest.TestCase):
             ("Crit", "CRITICAL"),
             ("info", "INFO"),
         ):
-
             brut = to_log(
-                ligne("service started", level=initial),
-                defaultdict(int)
+                ligne("service started", level=initial), defaultdict(int)
             )
 
             assert brut is not None
 
-            self.assertEqual(
-                normalize(brut)["level"],
-                attendu
-            )
+            self.assertEqual(normalize(brut)["level"], attendu)
 
     def test_source_et_utilisateur_en_minuscules(self) -> None:
 
@@ -139,7 +108,7 @@ class TestPoint4Normalisation(unittest.TestCase):
             ligne("slow response", user="  Carol  ").replace(
                 " | api | ", " | NGINX | "
             ),
-            defaultdict(int)
+            defaultdict(int),
         )
 
         assert brut is not None
@@ -151,8 +120,7 @@ class TestPoint4Normalisation(unittest.TestCase):
         self.assertEqual(propre["payload"], "slow response")
 
         absent = to_log(
-            ligne("service started", user="  -  "),
-            defaultdict(int)
+            ligne("service started", user="  -  "), defaultdict(int)
         )
 
         assert absent is not None
@@ -161,35 +129,23 @@ class TestPoint4Normalisation(unittest.TestCase):
 
     def test_protocole_et_payload_connexion(self) -> None:
 
-        brut = to_log(
-            ligne("198.51.100.7:22/tcp"),
-            defaultdict(int)
-        )
+        brut = to_log(ligne("198.51.100.7:22/tcp"), defaultdict(int))
 
         assert brut is not None
 
         propre = normalize(brut)
 
-        self.assertEqual(
-            brut["connection"],
-            ("198.51.100.7", 22, "tcp")
-        )
+        self.assertEqual(brut["connection"], ("198.51.100.7", 22, "tcp"))
 
-        self.assertEqual(
-            propre["connection"],
-            ("198.51.100.7", 22, "TCP")
-        )
+        self.assertEqual(propre["connection"], ("198.51.100.7", 22, "TCP"))
 
-        self.assertEqual(
-            propre["payload"],
-            "198.51.100.7:22/TCP"
-        )
+        self.assertEqual(propre["payload"], "198.51.100.7:22/TCP")
 
     def test_json_copie_et_idempotence(self) -> None:
 
         brut = to_log(
             ligne('{"event": "login", "status": " success ", "code": 200}'),
-            defaultdict(int)
+            defaultdict(int),
         )
 
         assert brut is not None
@@ -212,38 +168,25 @@ class TestPoint4Normalisation(unittest.TestCase):
 
 
 class TestPoint5Flux(unittest.TestCase):
-
     def test_echantillon_et_compteurs(self) -> None:
         rejected = defaultdict(int)
 
-        logs = list(
-            prepare_logs(read_lines("data/sample.log"), rejected)
-        )
+        logs = list(prepare_logs(read_lines("data/sample.log"), rejected))
 
         self.assertEqual(len(logs), SAMPLE_EXPECTED["valid"])
 
-        self.assertEqual(
-            dict(rejected),
-            SAMPLE_EXPECTED["rejected"]
-        )
+        self.assertEqual(dict(rejected), SAMPLE_EXPECTED["rejected"])
 
-        self.assertTrue(
-            any(log["level"] == "INFO" for log in logs)
-        )
+        self.assertTrue(any(log["level"] == "INFO" for log in logs))
 
-        self.assertTrue(
-            any(log["level"] == "WARNING" for log in logs)
-        )
+        self.assertTrue(any(log["level"] == "WARNING" for log in logs))
 
     def test_flux_reste_paresseux(self) -> None:
         rejected = defaultdict(int)
         lues = []
 
         def source():
-            for texte in (
-                ligne("service started"),
-                ligne("login success")
-            ):
+            for texte in (ligne("service started"), ligne("login success")):
                 lues.append(texte)
                 yield texte
 
@@ -267,29 +210,15 @@ class TestPoint5Flux(unittest.TestCase):
     def test_plusieurs_sources_sans_liste_intermediaire(self) -> None:
         rejected = defaultdict(int)
 
-        chemins = (
-            "data/sample.log",
-            "data/sample.log"
-        )
+        chemins = ("data/sample.log", "data/sample.log")
 
-        total = sum(
-            1 for _ in prepare_logs(
-                read_sources(chemins),
-                rejected
-            )
-        )
+        total = sum(1 for _ in prepare_logs(read_sources(chemins), rejected))
 
-        self.assertEqual(
-            total,
-            2 * SAMPLE_EXPECTED["valid"]
-        )
+        self.assertEqual(total, 2 * SAMPLE_EXPECTED["valid"])
 
         self.assertEqual(
             dict(rejected),
-            {
-                motif: 2 * n
-                for motif, n in SAMPLE_EXPECTED["rejected"].items()
-            }
+            {motif: 2 * n for motif, n in SAMPLE_EXPECTED["rejected"].items()},
         )
 
     def test_integration_detection(self) -> None:
@@ -299,10 +228,8 @@ class TestPoint5Flux(unittest.TestCase):
         alertes_aux_positions = []
 
         for position, log in enumerate(
-            prepare_logs(read_lines("data/sample.log"), rejected),
-            start=1
+            prepare_logs(read_lines("data/sample.log"), rejected), start=1
         ):
-
             if detect_bruteforce(log, state=state, threshold=3):
                 alertes_aux_positions.append(position)
 

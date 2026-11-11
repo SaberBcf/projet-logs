@@ -9,7 +9,6 @@ from typing import Any
 
 from logengine.models import Log, Rejected
 
-
 NIVEAUX_ACCEPTES = {
     "INFO",
     "WARNING",
@@ -100,7 +99,6 @@ def to_log(line: str, rejected: Rejected) -> Log | None:
     connection = (ip, None, None)
 
     match candidat:
-
         case "login failure":
             payload = {
                 "event": "login",
@@ -158,7 +156,6 @@ def normalize(log: Log) -> Log:
     donnees = log["payload"]
 
     if isinstance(donnees, dict):
-
         payload = {
             cle: valeur.strip() if isinstance(valeur, str) else valeur
             for cle, valeur in donnees.items()
@@ -185,16 +182,10 @@ def prepare_logs(lines: Iterable[str], rejected: Rejected) -> Iterator[Log]:
     """Préparation progressive des logs."""
 
     # Lignes vides
-    lignes_non_vides = filter(
-        lambda ligne: bool(ligne.strip()),
-        lines
-    )
+    lignes_non_vides = filter(lambda ligne: bool(ligne.strip()), lines)
 
     # Parsing
-    logs_parses = map(
-        lambda ligne: to_log(ligne, rejected),
-        lignes_non_vides
-    )
+    logs_parses = map(lambda ligne: to_log(ligne, rejected), lignes_non_vides)
 
     # Rejets
     logs_valides = filter(None, logs_parses)
