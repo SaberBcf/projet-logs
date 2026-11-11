@@ -10,7 +10,10 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         description="Analyse de fichiers de logs de sécurité."
     )
     parser.add_argument(
-        "--files", nargs="+", required=True, help="fichiers de logs à lire"
+        "--files",
+        nargs="+",
+        default=["data/sample.log"],
+        help="fichiers de logs à lire (par défaut : l'échantillon fourni)",
     )
     parser.add_argument(
         "--threshold",

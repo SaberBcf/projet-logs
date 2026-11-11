@@ -27,22 +27,22 @@ Chacun écrit les tests de ses fichiers dans `tests/test_<fichier>.py`.
 
 ## Couverture du barème
 
-- [ ] Générateur avec `yield` (A)
-- [ ] Sous-générateur avec `yield from` sur plusieurs fichiers (A)
-- [ ] Lignes parsées en dictionnaires, champs variés (A)
-- [ ] Tuples pour les métadonnées `(ip, port, protocole)` (A)
-- [ ] `filter` + `lambda`, et `filter(None, ...)` (A)
-- [ ] `map` + normalisation avec f-strings (A)
-- [ ] `match-case` sur chaîne, dictionnaire et tuple (A)
-- [ ] IP en erreur dans un `set` (B)
-- [ ] Liste noire en `frozenset`, opérations `|`, `&`, `-`, `^` (B)
-- [ ] Comptages avec `defaultdict` (B)
-- [ ] Force brute avec `while`, `for`, `break`, `continue`, `else` de boucle (B)
-- [ ] `apply_security_rules(*args, **kwargs)` avec fonctions en argument (C)
-- [ ] Audit avec `globals()` et `locals()`, export d'un rapport (C)
-- [ ] Fichier unique de 10 à 15 Go, varié, avec lignes à nettoyer et malformées (C)
-- [ ] `requirements.txt`, venv, rapport PDF (tous)
-- [ ] Typage, PEP8, gestion des exceptions (tous)
+- [x] Générateur avec `yield` (A)
+- [x] Sous-générateur avec `yield from` sur plusieurs fichiers (A)
+- [x] Lignes parsées en dictionnaires, champs variés (A)
+- [x] Tuples pour les métadonnées `(ip, port, protocole)` (A)
+- [x] `filter` + `lambda`, et `filter(None, ...)` (A)
+- [x] `map` + normalisation avec f-strings (A)
+- [x] `match-case` sur chaîne, dictionnaire et tuple (A)
+- [x] IP en erreur dans un `set` (B)
+- [x] Liste noire en `frozenset`, opérations `|`, `&`, `-`, `^` (B)
+- [x] Comptages avec `defaultdict` (B)
+- [x] Force brute avec `while`, `for`, `break`, `continue`, `else` de boucle (B)
+- [x] `apply_security_rules(*args, **kwargs)` avec fonctions en argument (C)
+- [x] Audit avec `globals()` et `locals()`, export d'un rapport (C)
+- [x] Fichier unique de 10 à 15 Go, varié, avec lignes à nettoyer et malformées (C)
+- [x] `requirements.txt`, venv, rapport PDF (tous)
+- [x] Typage, PEP8, gestion des exceptions (tous)
 
 ## Routine Git
 

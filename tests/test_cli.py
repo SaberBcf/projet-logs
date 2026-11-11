@@ -13,6 +13,7 @@ class TestParseArgs(unittest.TestCase):
         self.assertEqual(args.threshold, 3)
         self.assertEqual(args.blacklist, "data/blacklist.txt")
         self.assertIsNone(args.audit)
+        self.assertEqual(parse_args([]).files, ["data/sample.log"])
 
     def test_refuses_bad_values(self) -> None:
         for extra in (["--threshold", "0"], ["--threshold", "trois"]):
