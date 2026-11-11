@@ -9,7 +9,7 @@ AUTH_STATUSES: frozenset[str] = frozenset({"failure", "success"})
 
 
 def _auth_status(log: Log) -> str | None:
-    """Renvoie "failure" ou "success" si le log est une connexion, sinon None."""
+    """Renvoie "failure" ou "success" pour un log de connexion, sinon None."""
     match log["payload"]:
         case {"event": "login", "status": str(status)} if (
             status in AUTH_STATUSES
@@ -45,7 +45,7 @@ def detect_bruteforce(
     if status == "success":
         state["alerted"].discard(key)
 
-    # while : on ne garde que les `threshold` derniers statuts (mémoire bornée).
+    # while : on garde que les `threshold` derniers statuts (mémoire bornée).
     while len(history) > threshold:
         history.popleft()
 
