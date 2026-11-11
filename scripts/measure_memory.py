@@ -28,7 +28,7 @@ def make_ip(n: int) -> str:
 
 
 def generate_logs(total: int, n_ips: int, n_users: int) -> Iterator[Log]:
-    """Produit `total` logs un par un, avec n_ips IP et n_users utilisateurs."""
+    """Produit `total` logs un par un (n_ips IP, n_users utilisateurs)."""
     rng = random.Random(SEED)
     for i in range(total):
         ip = make_ip(rng.randrange(n_ips))
@@ -69,7 +69,8 @@ def measure(
             _, peak = tracemalloc.get_traced_memory()
             elapsed = time.perf_counter() - start
             print(
-                f"  {i:>13,} logs | pic {peak / 1_000_000:7.2f} Mo | {elapsed:7.1f} s"
+                f"  {i:>13,} logs | pic {peak / 1_000_000:7.2f} Mo"
+                f" | {elapsed:7.1f} s"
             )
 
     duration = time.perf_counter() - start
@@ -91,8 +92,12 @@ SCENARIOS: tuple[tuple[str, int, int, int], ...] = (
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    parser.add_argument("--logs", type=int, help="nombre de logs (un seul test)")
+    parser = argparse.ArgumentParser(
+        description="Mesure de la mémoire utilisée par le module 3."
+    )
+    parser.add_argument(
+        "--logs", type=int, help="nombre de logs (un seul test)"
+    )
     parser.add_argument("--ips", type=int, default=50, help="IP possibles")
     parser.add_argument("--users", type=int, default=20, help="utilisateurs")
     return parser.parse_args()
@@ -127,7 +132,9 @@ def main() -> None:
     print(header)
     print("-" * len(header))
     for name, total, n_ips, n_users in SCENARIOS:
-        peak_mb, duration, alerts, ips, couples = measure(total, n_ips, n_users)
+        peak_mb, duration, alerts, ips, couples = measure(
+            total, n_ips, n_users
+        )
         print(
             f"{name:<32}{total:>11,}{ips:>11,}{couples:>11,}"
             f"{peak_mb:>11.2f} Mo{duration:>8.1f} s{alerts:>10,}"

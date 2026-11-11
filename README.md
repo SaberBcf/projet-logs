@@ -7,11 +7,11 @@ noire.
 
 ## Prérequis
 
-Python 3.10 ou plus récent, et 15 Go d'espace disque libre pour le jeu de
-données.
+Python 3.10 ou plus récent (projet développé et mesuré avec Python 3.14),
+et 15 Go d'espace disque libre pour le jeu de données.
 
 Le projet n'utilise que la bibliothèque standard : `requirements.txt`,
-généré par `pip freeze`, est donc vide.
+généré par `pip freeze`, ne contient donc qu'une ligne de commentaire.
 
 ## Installation
 
@@ -31,10 +31,20 @@ source .venv/bin/activate
 python -m pip install -r requirements.txt
 ```
 
+## Démonstration rapide
+
+```bash
+python main.py
+```
+
+Sans option, le programme exécute tout le pipeline sur l'échantillon fourni
+`data/sample.log` (20 lignes) : 12 logs valides, 7 lignes rejetées et 3
+alertes.
+
 ## Générer le jeu de données
 
 ```bash
-python generate_logs.py --size 15GB --output data/generated/logs.log --seed 42
+python generate_logs.py --size 10GB --output data/generated/logs.log --seed 42
 ```
 
 Avec la même graine (`--seed`), le fichier produit est toujours identique.
@@ -43,15 +53,19 @@ Pour développer, une taille de `100MB` suffit.
 ## Lancer l'analyse
 
 ```bash
-python main.py --files data/generated/logs.log --threshold 3 --blacklist data/blacklist.txt --audit audit.json
+python main.py --files data/generated/logs.log --audit audit.json
 ```
 
-| Option | Rôle |
-|---|---|
-| `--files` | Un ou plusieurs fichiers, lus dans l'ordre donné |
-| `--threshold` | Nombre d'échecs consécutifs qui déclenche une alerte |
-| `--blacklist` | Fichier contenant une IP par ligne |
-| `--audit` | Fichier JSON où exporter l'audit des variables |
+Sur le fichier de 10 Go (environ 118 millions de logs), le traitement dure
+environ 19 minutes et le processus reste autour de 26 Mo de mémoire.
+
+| Option | Rôle | Défaut |
+|---|---|---|
+| `--files` | Un ou plusieurs fichiers, lus dans l'ordre donné | `data/sample.log` |
+| `--threshold` | Nombre d'échecs consécutifs qui déclenche une alerte | 3 |
+| `--blacklist` | Fichier contenant une IP par ligne | `data/blacklist.txt` |
+| `--audit` | Fichier JSON où exporter l'audit des variables | aucun |
+| `--max-alerts` | Nombre d'alertes affichées en détail pendant le traitement | 20 |
 
 ## Tests
 
@@ -59,11 +73,17 @@ python main.py --files data/generated/logs.log --threshold 3 --blacklist data/bl
 python -m unittest
 ```
 
+Mesure de la mémoire du module 3 avec `tracemalloc` :
+
+```bash
+python -m scripts.measure_memory
+```
+
 ## Structure
 
 ```
 main.py                 point d'entrée
-generate_logs.py        générateur du jeu de données
+generate_logs.py        script de génération du jeu de données
 logengine/
     models.py           types partagés (Log, Alert, Rule)
     ingestion.py        module 1 : lecture progressive
@@ -73,9 +93,14 @@ logengine/
     rules.py            module 4 : moteur de règles, liste noire
     audit.py            module 4 : introspection
     cli.py              options de la ligne de commande
+scripts/
+    measure_memory.py   mesure de la mémoire du module 3
 tests/                  tests unitaires et jeu de test commun
 data/                   exemple de logs et liste noire
-docs/contrat.md         format des lignes, anomalies, signatures
+docs/
+    contrat.md          format des lignes, anomalies, signatures
+    organisation.md     répartition, planning, routine Git
+    Rapport.pdf         rapport final
 ```
 
 ## Équipe
