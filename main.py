@@ -37,7 +37,7 @@ def main() -> None:
     state = init_state()
     rejected: Rejected = defaultdict(int)
     alert_counts: defaultdict[str, int] = defaultdict(int)
-    shown = 0
+    displayed: set[tuple[str, str]] = set()
     start = time.time()
 
     logs = prepare_logs(read_sources(args.files), rejected)
@@ -53,8 +53,9 @@ def main() -> None:
         )
         for alert in alerts:
             alert_counts[alert["rule"]] += 1
-            if shown < args.max_alerts:
-                shown += 1
+            pair = (alert["rule"], alert["ip"])
+            if pair not in displayed and len(displayed) < args.max_alerts:
+                displayed.add(pair)
                 rule, when, text = (
                     alert["rule"],
                     alert["timestamp"],

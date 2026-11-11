@@ -16,11 +16,12 @@ START = 1793491200  # 2026-11-01T00:00:00Z en secondes depuis 1970
 LINES_PER_SECOND = 20
 
 P_ATTACK = 1 / 4000  # une vague de force brute toutes les 4000 lignes
-P_EMPTY = 1 / 500
-P_BROKEN = 1 / 100
-P_DIRTY = 1 / 100
+P_EMPTY = 0.002
+P_BROKEN = 0.01
+P_DIRTY = 0.03
 
 CLIENTS = [f"10.0.{a}.{b}" for a in range(80) for b in range(1, 251)]
+UNSTABLE_CLIENTS = CLIENTS[:2000]  # les 10 % de clients qui ont des erreurs
 USERS = [f"user{n}" for n in range(5000)]
 ATTACKERS = [f"198.51.100.{n}" for n in range(10, 50)]
 SOURCES = ["api"] * 35 + ["nginx"] * 20 + ["sshd"] * 20
@@ -134,6 +135,8 @@ def generate_lines(seed: int) -> Iterator[str]:
             continue
         ip = random.choice(CLIENTS)
         level, source, user, message = make_event(ip)
+        if level in ("ERROR", "CRITICAL"):
+            ip = random.choice(UNSTABLE_CLIENTS)
         fields = [timestamp(line_number), level, source, ip, user, message]
         roll = random.random()
         if roll < P_EMPTY:
