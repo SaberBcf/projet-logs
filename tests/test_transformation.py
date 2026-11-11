@@ -1,13 +1,16 @@
-"""Tests du module de transformation des logs."""
+"""Tests des modules d'ingestion et de transformation."""
 
 import unittest
 from collections import defaultdict
 
-from logengine.transformation import normalize, to_log
+from logengine.analytics import init_state
+from logengine.detection import detect_bruteforce
+from logengine.ingestion import read_lines, read_sources
+from logengine.transformation import normalize, prepare_logs, to_log
+from tests.fixtures import SAMPLE_EXPECTED
 
 
 def ligne(message: str, *, level: str = "INFO", user: str = "alice") -> str:
-    """Construit une ligne valide dont on fait varier le message."""
     return (
         f"2026-11-05T14:30:01Z | {level} | api | "
         f"192.0.2.10 | {user} | {message}"
@@ -66,7 +69,10 @@ class TestPoint3Interpretation(unittest.TestCase):
             )
         )
 
-        self.assertEqual(dict(rejected), {"json_invalide": 1})
+        self.assertEqual(
+            dict(rejected),
+            {"json_invalide": 1}
+        )
 
     def test_connexion_routee_en_tuple(self) -> None:
         rejected = defaultdict(int)
@@ -98,7 +104,10 @@ class TestPoint3Interpretation(unittest.TestCase):
             to_log(ligne("203.0.113.5:65536/TCP"), rejected)
         )
 
-        self.assertEqual(dict(rejected), {"port_invalide": 2})
+        self.assertEqual(
+            dict(rejected),
+            {"port_invalide": 2}
+        )
 
 
 class TestPoint4Normalisation(unittest.TestCase):
@@ -130,7 +139,7 @@ class TestPoint4Normalisation(unittest.TestCase):
             ligne("slow response", user="  Carol  ").replace(
                 " | api | ", " | NGINX | "
             ),
-            defaultdict(int),
+            defaultdict(int)
         )
 
         assert brut is not None
@@ -187,23 +196,117 @@ class TestPoint4Normalisation(unittest.TestCase):
 
         propre = normalize(brut)
 
-        payload_brut = brut["payload"]
         payload_propre = propre["payload"]
+        payload_brut = brut["payload"]
 
-        assert isinstance(payload_brut, dict)
         assert isinstance(payload_propre, dict)
+        assert isinstance(payload_brut, dict)
 
         self.assertEqual(payload_propre["status"], "success")
         self.assertEqual(payload_propre["code"], 200)
-
-        # Le dictionnaire initial ne doit pas être modifié.
         self.assertEqual(payload_brut["status"], " success ")
 
-        # Les deux dictionnaires doivent être distincts.
         self.assertIsNot(payload_propre, payload_brut)
 
-        # Normaliser deux fois doit donner le même résultat.
         self.assertEqual(normalize(propre), propre)
+
+
+class TestPoint5Flux(unittest.TestCase):
+
+    def test_echantillon_et_compteurs(self) -> None:
+        rejected = defaultdict(int)
+
+        logs = list(
+            prepare_logs(read_lines("data/sample.log"), rejected)
+        )
+
+        self.assertEqual(len(logs), SAMPLE_EXPECTED["valid"])
+
+        self.assertEqual(
+            dict(rejected),
+            SAMPLE_EXPECTED["rejected"]
+        )
+
+        self.assertTrue(
+            any(log["level"] == "INFO" for log in logs)
+        )
+
+        self.assertTrue(
+            any(log["level"] == "WARNING" for log in logs)
+        )
+
+    def test_flux_reste_paresseux(self) -> None:
+        rejected = defaultdict(int)
+        lues = []
+
+        def source():
+            for texte in (
+                ligne("service started"),
+                ligne("login success")
+            ):
+                lues.append(texte)
+                yield texte
+
+        flux = prepare_logs(source(), rejected)
+
+        self.assertEqual(lues, [])
+        self.assertEqual(dict(rejected), {})
+
+        premier = next(flux)
+
+        self.assertEqual(premier["payload"], "service started")
+        self.assertEqual(len(lues), 1)
+
+        deuxieme = next(flux)
+        payload = deuxieme["payload"]
+
+        assert isinstance(payload, dict)
+
+        self.assertEqual(payload["status"], "success")
+
+    def test_plusieurs_sources_sans_liste_intermediaire(self) -> None:
+        rejected = defaultdict(int)
+
+        chemins = (
+            "data/sample.log",
+            "data/sample.log"
+        )
+
+        total = sum(
+            1 for _ in prepare_logs(
+                read_sources(chemins),
+                rejected
+            )
+        )
+
+        self.assertEqual(
+            total,
+            2 * SAMPLE_EXPECTED["valid"]
+        )
+
+        self.assertEqual(
+            dict(rejected),
+            {
+                motif: 2 * n
+                for motif, n in SAMPLE_EXPECTED["rejected"].items()
+            }
+        )
+
+    def test_integration_detection(self) -> None:
+        rejected = defaultdict(int)
+        state = init_state()
+
+        alertes_aux_positions = []
+
+        for position, log in enumerate(
+            prepare_logs(read_lines("data/sample.log"), rejected),
+            start=1
+        ):
+
+            if detect_bruteforce(log, state=state, threshold=3):
+                alertes_aux_positions.append(position)
+
+        self.assertEqual(alertes_aux_positions, [5])
 
 
 if __name__ == "__main__":

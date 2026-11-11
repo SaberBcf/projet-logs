@@ -20,12 +20,8 @@ NIVEAUX_ACCEPTES = {
     "CRIT",
 }
 
-
-# Reconnaissance des messages de connexion : adresse:port/protocole.
 CONNEXION_RE = re.compile(r"([0-9.]+):([^/\s]+)/([A-Za-z]+)")
 
-
-# Correspondances entre les niveaux abrégés et les niveaux complets.
 ALIASES_NIVEAUX = {
     "WARN": "WARNING",
     "ERR": "ERROR",
@@ -34,7 +30,7 @@ ALIASES_NIVEAUX = {
 
 
 def to_log(line: str, rejected: Rejected) -> Log | None:
-    """Valide les champs et route le message texte, JSON ou connexion."""
+    """Validation et routage des messages."""
 
     champs = line.split(" | ", 5)
 
@@ -68,7 +64,6 @@ def to_log(line: str, rejected: Rejected) -> Log | None:
 
     message = message.strip()
 
-    # Le message peut devenir une chaîne, un dictionnaire ou un tuple.
     candidat: str | dict[str, Any] | tuple[str, int, str] = message
 
     if message.startswith("{"):
@@ -140,13 +135,11 @@ def to_log(line: str, rejected: Rejected) -> Log | None:
 
 
 def normalize(log: Log) -> Log:
-    """Renvoie un log nettoyé sans modifier le dictionnaire reçu."""
+    """Normalisation sans modification du log original."""
 
-    # 1. Normalisation du niveau de gravité
     niveau = log["level"].strip().upper()
     niveau = ALIASES_NIVEAUX.get(niveau, niveau)
 
-    # 2. Normalisation de l'utilisateur
     utilisateur = log["user"]
 
     if utilisateur is not None:
@@ -155,7 +148,6 @@ def normalize(log: Log) -> Log:
         if utilisateur == "-":
             utilisateur = None
 
-    # 3. Normalisation du tuple de connexion
     adresse_connexion, port, protocole = log["connection"]
 
     adresse_connexion = adresse_connexion.strip()
@@ -163,12 +155,10 @@ def normalize(log: Log) -> Log:
     if protocole is not None:
         protocole = protocole.strip().upper()
 
-    # 4. Normalisation du payload
     donnees = log["payload"]
 
     if isinstance(donnees, dict):
 
-        # On copie le dictionnaire sans modifier l'original.
         payload = {
             cle: valeur.strip() if isinstance(valeur, str) else valeur
             for cle, valeur in donnees.items()
@@ -177,11 +167,9 @@ def normalize(log: Log) -> Log:
     else:
         payload = donnees.strip()
 
-        # On harmonise la représentation des connexions réseau.
         if port is not None and protocole is not None:
             payload = f"{adresse_connexion}:{port}/{protocole}"
 
-    # 5. Construction du nouveau log normalisé.
     return {
         "timestamp": log["timestamp"].strip(),
         "level": niveau,
@@ -194,6 +182,22 @@ def normalize(log: Log) -> Log:
 
 
 def prepare_logs(lines: Iterable[str], rejected: Rejected) -> Iterator[Log]:
-    """Assemble les étapes du pipeline de traitement des logs."""
+    """Préparation progressive des logs."""
 
-    raise NotImplementedError
+    # Lignes vides
+    lignes_non_vides = filter(
+        lambda ligne: bool(ligne.strip()),
+        lines
+    )
+
+    # Parsing
+    logs_parses = map(
+        lambda ligne: to_log(ligne, rejected),
+        lignes_non_vides
+    )
+
+    # Rejets
+    logs_valides = filter(None, logs_parses)
+
+    # Normalisation
+    return map(normalize, logs_valides)
