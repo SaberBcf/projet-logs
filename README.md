@@ -10,8 +10,9 @@ noire.
 Python 3.10 ou plus récent (projet développé et mesuré avec Python 3.14),
 et 15 Go d'espace disque libre pour le jeu de données.
 
-Le projet n'utilise que la bibliothèque standard : `requirements.txt`,
-généré par `pip freeze`, ne contient donc qu'une ligne de commentaire.
+Le projet n'utilise que la bibliothèque standard : `pip freeze` ne renvoie
+rien, et `requirements.txt` ne contient qu'une ligne de commentaire qui le
+signale.
 
 ## Installation
 

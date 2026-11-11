@@ -42,8 +42,8 @@ Le `match-case` du module 2 route ces trois formes.
 |---|---|---|
 | Espaces en trop autour d'un champ | `\|  warn  \|` | espaces retirés |
 | Niveau en minuscules ou abrégé | `warn`, `err`, `crit` | `WARNING`, `ERROR`, `CRITICAL` |
-| Source ou utilisateur en majuscules | `NGINX`, `Carol` | `nginx`, `carol` |
-| Protocole en minuscules | `:443/tcp` | `TCP` |
+| Source en majuscules | `NGINX` | `nginx` |
+| Utilisateur en majuscules, protocole en minuscules (seulement dans `data/sample.log`) | `Carol`, `:443/tcp` | `carol`, `TCP` |
 | Ligne vide ou faite d'espaces | | ignorée par `filter` avec `lambda`, non comptée |
 
 ### À rejeter : la ligne est écartée et comptée par motif
